@@ -1,0 +1,36 @@
+//@version=4
+strategy("TradingView and Telegram Integration")
+
+// Moving Average Crossover
+fastLength = input(title="Fast MA Length", type=input.integer, defval=10)
+slowLength = input(title="Slow MA Length", type=input.integer, defval=30)
+
+fastMA = sma(close, fastLength)
+slowMA = sma(close, slowLength)
+
+buySignal = crossover(fastMA, slowMA)
+sellSignal = crossunder(fastMA, slowMA)
+
+// Plot Signals
+plot(fastMA, color=color.blue, linewidth=1, title="Fast MA")
+plot(slowMA, color=color.red, linewidth=1, title="Slow MA")
+
+plotshape(buySignal, title="Buy Signal", location=location.belowbar, color=color.green, transp=0, style=shape.triangleup, text="BUY")
+plotshape(sellSignal, title="Sell Signal", location=location.abovebar, color=color.red, transp=0, style=shape.triangledown, text="SELL")
+
+// Telegram Bot Notification
+telegram_token = "5573016646:AAFi5PBkD9p3ojG9XVpkbKV16zGOXhY5Yic"
+telegram_chat_id = "434249851"
+
+// Define the webhook URL
+webhook_url = "https://hooks.zapier.com/hooks/catch/14811891/3369az1/"
+
+telegram_message_long = "BUY Signal on " + syminfo.ticker + " at " + tostring(close)
+telegram_message_short = "SELL Signal on " + syminfo.ticker + " at " + tostring(close)
+
+alertcondition(buySignal, title="Buy Signal", message="Buy Signal Detected")
+if buySignal
+    strategy.entry("Buy", strategy.long)
+
+if sellSignal
+    strategy.entry("Sell", strategy.short)
